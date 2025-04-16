@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Facial Emotion Recognition{% endblock %}</title>
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Include Chart.js for visualizations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <div class="container">
+        <header>
+            <nav class="navbar">
+                <div class="logo">
+                    <a href="{{ url_for('main_bp.index') }}">
+                        <i class="fas fa-smile"></i>
+                        <h1>EmotionLens</h1>
+                    </a>
+                </div>
+                <div class="nav-links">
+                    <ul>
+                        <li><a href="{{ url_for('main_bp.index') }}">Home</a></li>
+                        {% if g is defined and g.user %}
+                        <li><a href="{{ url_for('dashboard_bp.dashboard') }}">Dashboard</a></li>
+                        <li><a href="{{ url_for('main_bp.emotion_recognition') }}">Recognition</a></li>
+                        <li><a href="{{ url_for('dashboard_bp.history') }}">History</a></li>
+                        <li><a href="{{ url_for('dashboard_bp.reports') }}">Reports</a></li>
+                        <li><a href="{{ url_for('settings_bp.settings') }}">Settings</a></li>
+                        <li><a href="{{ url_for('main_bp.logout') }}">Logout</a></li>
+                        {% else %}
+                        <li><a href="{{ url_for('main_bp.about') }}">About</a></li>
+                        <li><a href="{{ url_for('main_bp.login') }}">Login</a></li>
+                        <li><a href="{{ url_for('main_bp.register') }}" class="btn-primary">Register</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div class="hamburger">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </nav>
+        </header>
+
+        <main>
+            {% for message in get_flashed_messages() %}
+            <div class="flash-message">
+                {{ message }}
+                <button class="close-btn">&times;</button>
+            </div>
+            {% endfor %}
+
+            {% block content %}{% endblock %}
+        </main>
+
+        <footer>
+            <p>&copy; {{ now('Y') }} EmotionLens. All rights reserved.</p>
+            <p>Facial Emotion Recognition System</p>
+        </footer>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

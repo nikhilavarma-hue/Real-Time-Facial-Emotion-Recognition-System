@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block title %}About - EmotionLens{% endblock %}
+
+{% block content %}
+<section class="about-container">
+    <h1>About EmotionLens</h1>
+    
+    <div class="about-section">
+        <h2>Our Mission</h2>
+        <p>
+            EmotionLens is dedicated to helping people understand and track their emotional states using cutting-edge 
+            facial recognition technology. Our mission is to provide intuitive, accurate, and privacy-focused 
+            emotion recognition tools that can improve emotional intelligence and well-being.
+        </p>
+    </div>
+    
+    <div class="about-section">
+        <h2>The Technology</h2>
+        <p>
+            Our emotion recognition system is powered by a state-of-the-art deep learning model trained on extensive 
+            datasets of facial expressions. We use MobileNetV2 architecture fine-tuned for seven key emotions:
+        </p>
+        
+        <div class="emotion-grid">
+            <div class="emotion-card emotion-angry">
+                <h3>Angry</h3>
+                <p>Detecting frustration and displeasure</p>
+            </div>
+            <div class="emotion-card emotion-disgust">
+                <h3>Disgust</h3>
+                <p>Recognizing aversion reactions</p>
+            </div>
+            <div class="emotion-card emotion-fear">
+                <h3>Fear</h3>
+                <p>Identifying anxious expressions</p>
+            </div>
+            <div class="emotion-card emotion-happy">
+                <h3>Happy</h3>
+                <p>Measuring joyful expressions</p>
+            </div>
+            <div class="emotion-card emotion-neutral">
+                <h3>Neutral</h3>
+                <p>Baseline expressions</p>
+            </div>
+            <div class="emotion-card emotion-sad">
+                <h3>Sad</h3>
+                <p>Detecting melancholy and distress</p>
+            </div>
+            <div class="emotion-card emotion-surprise">
+                <h3>Surprise</h3>
+                <p>Recognizing astonishment</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="about-section">
+        <h2>Privacy Focus</h2>
+        <p>
+            We understand the sensitivity of facial data. All processing happens on our secure servers, 
+            and you have full control over your data. Our privacy mode allows you to process emotions 
+            without storing any facial images.
+        </p>
+        <p>
+            We do not share your data with third parties and employ industry-standard encryption to 
+            protect all information.
+        </p>
+    </div>
+    
+    <div class="about-section">
+        <h2>The Team</h2>
+        <p>
+            EmotionLens was developed by a team of passionate AI engineers, UX designers, and 
+            psychology researchers committed to creating technology that enhances human understanding.
+        </p>
+    </div>
+    
+    <div class="about-section">
+        <h2>Contact Us</h2>
+        <p>
+            Have questions or feedback? We'd love to hear from you!
+        </p>
+        <p>
+            Email: <a href="mailto:info@emotionlens.com">info@emotionlens.com</a><br>
+            Support: <a href="mailto:support@emotionlens.com">support@emotionlens.com</a>
+        </p>
+    </div>
+    
+    <div class="cta-section">
+        <h2>Ready to get started?</h2>
+        <p>Join thousands of users who are gaining insights into their emotional patterns.</p>
+        <div class="cta-buttons">
+            {% if g.user %}
+            <a href="{{ url_for('main_bp.emotion_recognition') }}" class="btn-primary">Start Recognition</a>
+            {% else %}
+            <a href="{{ url_for('main_bp.register') }}" class="btn-primary">Sign Up Now</a>
+            <a href="{{ url_for('main_bp.login') }}" class="btn-secondary">Login</a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<style>
+    .about-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 2rem 0;
+    }
+    
+    .about-section {
+        margin-bottom: 3rem;
+    }
+    
+    .emotion-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+    
+    .emotion-card {
+        padding: 1.5rem;
+        border-radius: 8px;
+        color: white;
+        text-align: center;
+    }
+    
+    .emotion-card h3 {
+        margin-bottom: 0.5rem;
+    }
+    
+    .emotion-card p {
+        margin-bottom: 0;
+        font-size: 0.9rem;
+    }
+    
+    .cta-section {
+        background-color: #f5f5f5;
+        padding: 2rem;
+        border-radius: 8px;
+        text-align: center;
+    }
+    
+    .cta-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+</style>
+{% endblock %}

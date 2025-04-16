@@ -1,0 +1,411 @@
+{% extends 'base.html' %}
+
+{% block title %}Settings - EmotionLens{% endblock %}
+
+{% block head %}
+<style>
+    .settings-container {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+
+    @media (min-width: 768px) {
+        .settings-container {
+            grid-template-columns: 250px 1fr;
+        }
+    }
+
+    .settings-sidebar {
+        background-color: var(--card-color);
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        border: 1px solid var(--border-color);
+    }
+
+    .settings-nav {
+        list-style: none;
+        padding: 0;
+    }
+
+    .settings-nav li {
+        margin-bottom: 10px;
+    }
+
+    .settings-nav a {
+        display: block;
+        padding: 10px 15px;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+        color: var(--text-color);
+        font-weight: 500;
+    }
+
+    .settings-nav a:hover, .settings-nav a.active {
+        background-color: var(--surface-color);
+        color: var(--primary-color);
+    }
+
+    .settings-nav a.active {
+        border-left: 3px solid var(--primary-color);
+    }
+
+    .settings-nav i {
+        margin-right: 10px;
+        width: 20px;
+        text-align: center;
+    }
+
+    .settings-content {
+        background-color: var(--card-color);
+        border-radius: 8px;
+        padding: 30px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        border: 1px solid var(--border-color);
+    }
+
+    .settings-section {
+        margin-bottom: 40px;
+    }
+
+    .settings-section:last-child {
+        margin-bottom: 0;
+    }
+
+    .settings-section h2 {
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 24px;
+    }
+
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 24px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 16px;
+        width: 16px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+
+    input:checked + .slider {
+        background-color: var(--primary-color);
+    }
+
+    input:checked + .slider:before {
+        transform: translateX(26px);
+    }
+
+    .theme-options {
+        display: flex;
+        gap: 20px;
+        margin-top: 15px;
+    }
+
+    .theme-option {
+        width: 80px;
+        text-align: center;
+        cursor: pointer;
+    }
+
+    .theme-preview {
+        height: 60px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+    }
+
+    .theme-preview.light {
+        background-color: #f5f5f5;
+        color: #333;
+    }
+
+    .theme-preview.dark {
+        background-color: #333;
+        color: #f5f5f5;
+    }
+
+    .theme-preview.selected, .theme-preview:hover {
+        border-color: var(--primary-color);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .settings-form-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .settings-form-row label {
+        flex: 1;
+        margin-bottom: 0;
+    }
+
+    .settings-form-row .form-control {
+        flex: 2;
+    }
+
+    .divider {
+        height: 1px;
+        background-color: var(--border-color);
+        margin: 30px 0;
+    }
+    
+    .faq-item h4 {
+        color: var(--text-color);
+    }
+    
+    .faq-item p {
+        color: var(--text-light);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1>Settings</h1>
+
+<div class="settings-container">
+    <div class="settings-sidebar">
+        <ul class="settings-nav">
+            <li><a href="#preferences" class="active" data-target="preferences-section"><i class="fas fa-sliders-h"></i> Preferences</a></li>
+            <li><a href="#account" data-target="account-section"><i class="fas fa-user"></i> Account</a></li>
+            <li><a href="#privacy" data-target="privacy-section"><i class="fas fa-shield-alt"></i> Privacy</a></li>
+            <li><a href="#notifications" data-target="notifications-section"><i class="fas fa-bell"></i> Notifications</a></li>
+            <li><a href="#help" data-target="help-section"><i class="fas fa-question-circle"></i> Help & Support</a></li>
+        </ul>
+    </div>
+
+    <div class="settings-content">
+        <!-- Preferences Section -->
+        <div id="preferences-section" class="settings-section active">
+            <h2>Preferences</h2>
+            <form action="{{ url_for('settings_bp.update_settings') }}" method="post">
+                <div class="settings-form-row">
+                    <label for="theme">Theme</label>
+                    <div class="theme-options">
+                        <div class="theme-option">
+                            <div class="theme-preview light {% if settings.theme == 'light' %}selected{% endif %}" data-theme="light"></div>
+                            <input type="radio" name="theme" value="light" id="theme-light" {% if settings.theme == 'light' %}checked{% endif %}>
+                            <label for="theme-light">Light</label>
+                        </div>
+                        <div class="theme-option">
+                            <div class="theme-preview dark {% if settings.theme == 'dark' %}selected{% endif %}" data-theme="dark"></div>
+                            <input type="radio" name="theme" value="dark" id="theme-dark" {% if settings.theme == 'dark' %}checked{% endif %}>
+                            <label for="theme-dark">Dark</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="settings-form-row">
+                    <label for="analysis_frequency">Emotion Analysis Frequency</label>
+                    <select name="analysis_frequency" id="analysis_frequency" class="form-control">
+                        <option value="1" {% if settings.analysis_frequency == 1 %}selected{% endif %}>Every frame</option>
+                        <option value="2" {% if settings.analysis_frequency == 2 %}selected{% endif %}>Every 2 frames</option>
+                        <option value="5" {% if settings.analysis_frequency == 5 %}selected{% endif %}>Every 5 frames</option>
+                        <option value="10" {% if settings.analysis_frequency == 10 %}selected{% endif %}>Every 10 frames</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-primary">Save Preferences</button>
+            </form>
+        </div>
+
+        <!-- Account Section -->
+        <div id="account-section" class="settings-section" style="display: none;">
+            <h2>Account Information</h2>
+            <form action="{{ url_for('settings_bp.update_account') }}" method="post">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" value="{{ user.username }}" class="form-control" disabled>
+                    <small>Username cannot be changed</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" value="{{ user.email }}" class="form-control" required>
+                </div>
+
+                <button type="submit" class="btn-primary">Update Account</button>
+            </form>
+
+            <div class="divider"></div>
+
+            <h3>Change Password</h3>
+            <form action="{{ url_for('settings_bp.update_password') }}" method="post">
+                <div class="form-group">
+                    <label for="current_password">Current Password</label>
+                    <input type="password" id="current_password" name="current_password" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="new_password">New Password</label>
+                    <input type="password" id="new_password" name="new_password" class="form-control" required>
+                    <small>Password must be at least 8 characters long</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm_password">Confirm New Password</label>
+                    <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
+                </div>
+
+                <button type="submit" class="btn-primary">Change Password</button>
+            </form>
+        </div>
+
+        <!-- Privacy Section -->
+        <div id="privacy-section" class="settings-section" style="display: none;">
+            <h2>Privacy Settings</h2>
+            <form action="{{ url_for('settings_bp.update_settings') }}" method="post">
+                <div class="settings-form-row">
+                    <label for="privacy_mode">Privacy Mode</label>
+                    <label class="switch">
+                        <input type="checkbox" id="privacy_mode" name="privacy_mode" {% if settings.privacy_mode %}checked{% endif %}>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <p class="mb-3">When enabled, your emotion data will not be stored in the database.</p>
+
+                <button type="submit" class="btn-primary">Save Privacy Settings</button>
+            </form>
+
+            <div class="divider"></div>
+
+            <h3>Data Management</h3>
+            <p>You can download or delete all your emotion data from our servers.</p>
+            
+            <div class="mt-3">
+                <a href="#" class="btn-secondary">Download My Data</a>
+                <button class="btn-primary" style="background-color: #f44336;">Delete All My Data</button>
+            </div>
+        </div>
+
+        <!-- Notifications Section -->
+        <div id="notifications-section" class="settings-section" style="display: none;">
+            <h2>Notification Settings</h2>
+            <form action="{{ url_for('settings_bp.update_settings') }}" method="post">
+                <div class="settings-form-row">
+                    <label for="notification_enabled">Enable Notifications</label>
+                    <label class="switch">
+                        <input type="checkbox" id="notification_enabled" name="notification_enabled" {% if settings.notification_enabled %}checked{% endif %}>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <p class="mb-3">Receive notifications about insights and recommendations based on your emotion data.</p>
+
+                <button type="submit" class="btn-primary">Save Notification Settings</button>
+            </form>
+        </div>
+
+        <!-- Help & Support Section -->
+        <div id="help-section" class="settings-section" style="display: none;">
+            <h2>Help & Support</h2>
+            
+            <h3>Frequently Asked Questions</h3>
+            <div class="faq-item mb-3">
+                <h4>How does emotion recognition work?</h4>
+                <p>Our system uses deep learning and computer vision to analyze facial expressions in real-time and classify them into seven basic emotions: angry, disgust, fear, happy, neutral, sad, and surprise.</p>
+            </div>
+            
+            <div class="faq-item mb-3">
+                <h4>Is my data secure?</h4>
+                <p>Yes, all processing happens locally on our servers. You can enable Privacy Mode in the Privacy settings to prevent storing your emotion data.</p>
+            </div>
+            
+            <div class="faq-item mb-3">
+                <h4>How accurate is the emotion recognition?</h4>
+                <p>Our model is trained on standardized emotion datasets and achieves over 90% accuracy on test datasets. However, real-world performance may vary depending on lighting conditions, camera quality, and other factors.</p>
+            </div>
+            
+            <h3>Contact Support</h3>
+            <p>If you need assistance, please contact our support team at <a href="mailto:support@emotion-lens.com">support@emotion-lens.com</a>.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Navigation tabs functionality
+    const navLinks = document.querySelectorAll('.settings-nav a');
+    const sections = document.querySelectorAll('.settings-section');
+    
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Hide all sections
+            sections.forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // Show selected section
+            const targetId = this.getAttribute('data-target');
+            document.getElementById(targetId).style.display = 'block';
+            
+            // Update active link
+            navLinks.forEach(navLink => {
+                navLink.classList.remove('active');
+            });
+            this.classList.add('active');
+        });
+    });
+    
+    // Theme selection
+    const themeOptions = document.querySelectorAll('.theme-preview');
+    const themeRadios = document.querySelectorAll('input[name="theme"]');
+    
+    themeOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            const theme = this.getAttribute('data-theme');
+            
+            // Update selected theme preview
+            themeOptions.forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            this.classList.add('selected');
+            
+            // Update radio button
+            document.getElementById('theme-' + theme).checked = true;
+            
+            // Apply theme immediately for preview
+            if (typeof setTheme === 'function') {
+                setTheme(theme);
+                localStorage.setItem('theme', theme);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

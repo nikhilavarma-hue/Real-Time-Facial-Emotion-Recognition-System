@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - EmotionLens{% endblock %}
+
+{% block content %}
+<section class="auth-container">
+    <div class="auth-form-container">
+        <h2>Login</h2>
+        {% if error %}
+        <div class="error-message">
+            {{ error }}
+        </div>
+        {% endif %}
+        <form method="post" class="auth-form">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required autofocus>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">Login</button>
+            </div>
+        </form>
+        <div class="auth-links">
+            <p>Don't have an account? <a href="{{ url_for('main_bp.register') }}">Register</a></p>
+        </div>
+    </div>
+    <div class="auth-image">
+        <img src="{{ url_for('static', filename='img/login.svg') }}" alt="Login">
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <!-- Background -->
+  <rect x="0" y="0" width="400" height="300" rx="0" fill="#f5f5f5" opacity="0.3" />
+  
+  <!-- Login Form Shape -->
+  <rect x="100" y="50" width="200" height="200" rx="15" fill="#ffffff" stroke="#4CAF50" stroke-width="2" />
+  
+  <!-- Username Field -->
+  <rect x="120" y="100" width="160" height="35" rx="5" fill="#f9f9f9" stroke="#dddddd" stroke-width="1" />
+  <circle cx="135" cy="117" r="8" fill="#4CAF50" opacity="0.8" />
+  <line x1="155" y1="117" x2="265" y2="117" stroke="#bbbbbb" stroke-width="2" />
+  
+  <!-- Password Field -->
+  <rect x="120" y="150" width="160" height="35" rx="5" fill="#f9f9f9" stroke="#dddddd" stroke-width="1" />
+  <rect x="127" y="109" width="16" height="16" rx="8" fill="#4CAF50" opacity="0.8" />
+  <line x1="155" y1="167" x2="265" y2="167" stroke="#bbbbbb" stroke-width="2" />
+  <circle cx="135" cy="167" r="8" fill="#4CAF50" opacity="0.8" />
+  
+  <!-- Login Button -->
+  <rect x="120" y="200" width="160" height="35" rx="5" fill="#4CAF50" />
+  <text x="200" y="223" font-family="Arial" font-size="16" font-weight="bold" text-anchor="middle" fill="white">Login</text>
+  
+  <!-- Form Title -->
+  <text x="200" y="80" font-family="Arial" font-size="18" font-weight="bold" text-anchor="middle" fill="#333333">User Login</text>
+  
+  <!-- Decorative Elements -->
+  <circle cx="320" cy="70" r="30" fill="#4CAF50" opacity="0.1" />
+  <circle cx="80" cy="230" r="40" fill="#4CAF50" opacity="0.1" />
+  <circle cx="350" cy="250" r="20" fill="#4CAF50" opacity="0.1" />
+</svg>

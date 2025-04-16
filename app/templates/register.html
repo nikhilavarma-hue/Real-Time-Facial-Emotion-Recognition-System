@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Register - EmotionLens{% endblock %}
+
+{% block content %}
+<section class="auth-container">
+    <div class="auth-form-container">
+        <h2>Create Account</h2>
+        {% if error %}
+        <div class="error-message">
+            {{ error }}
+        </div>
+        {% endif %}
+        <form method="post" class="auth-form">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required autofocus>
+                <small>Username must be 3-20 characters long and can only contain letters, numbers, and underscores.</small>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+                <small>Password must be at least 8 characters long.</small>
+            </div>
+            <div class="form-group">
+                <label for="confirm_password">Confirm Password</label>
+                <input type="password" id="confirm_password" name="confirm_password" required>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">Register</button>
+            </div>
+        </form>
+        <div class="auth-links">
+            <p>Already have an account? <a href="{{ url_for('main_bp.login') }}">Login</a></p>
+        </div>
+    </div>
+    <div class="auth-image">
+        <img src="{{ url_for('static', filename='img/register.svg') }}" alt="Register">
+    </div>
+</section>
+{% endblock %}

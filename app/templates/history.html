@@ -1,0 +1,499 @@
+{% extends 'base.html' %}
+
+{% block title %}Emotion History - EmotionLens{% endblock %}
+
+{% block head %}
+<style>
+    .history-container {
+        max-width: 1280px;
+        margin: 0 auto;
+    }
+
+    .history-header {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 2.5rem;
+    }
+    
+    .history-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    @media (min-width: 768px) {
+        .history-header {
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+        }
+    }
+
+    .history-controls {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    
+    @media (min-width: 768px) {
+        .history-controls {
+            margin-top: 0;
+        }
+    }
+
+    .filter-dropdown {
+        padding: 0.75rem 1rem;
+        border-radius: var(--border-radius);
+        border: 1px solid var(--border-color);
+        background-color: var(--surface-color);
+        color: var(--text-color);
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+    }
+    
+    .filter-dropdown:hover, .filter-dropdown:focus {
+        border-color: var(--primary-color);
+        outline: none;
+    }
+    
+    .filter-dropdown option {
+        background-color: var(--surface-color);
+        color: var(--text-color);
+    }
+
+    .history-timeline {
+        margin-top: 2.5rem;
+        margin-bottom: 3rem;
+        background-color: var(--card-color);
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+    }
+    
+    .history-timeline h2 {
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border-color-light);
+    }
+    
+    .history-timeline h2::after {
+        display: none;
+    }
+
+    .timeline-container {
+        height: 300px;
+        padding: 1rem 0;
+    }
+
+    .history-items {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        margin-top: 2.5rem;
+    }
+
+    @media (min-width: 768px) {
+        .history-items {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (min-width: 992px) {
+        .history-items {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    .history-item {
+        background-color: var(--card-color);
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        padding: 1.25rem;
+        transition: all 0.25s ease;
+    }
+
+    .history-item:hover {
+        border-color: var(--border-primary);
+        transform: translateY(-5px);
+    }
+
+    .history-item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border-color-light);
+    }
+
+    .history-date {
+        font-size: 0.875rem;
+        color: var(--text-light);
+    }
+    
+    .emotion-badge {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        color: white;
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-transform: capitalize;
+    }
+
+    .emotion-chart {
+        margin-top: 1rem;
+        height: 120px;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 3rem;
+        margin-bottom: 2rem;
+    }
+
+    .pagination a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 2.5rem;
+        height: 2.5rem;
+        padding: 0 0.75rem;
+        margin: 0 0.25rem;
+        border-radius: var(--border-radius);
+        background-color: var(--card-color);
+        border: 1px solid var(--border-color);
+        color: var(--text-color);
+        text-decoration: none;
+        transition: all 0.2s ease;
+        font-weight: 500;
+    }
+
+    .pagination a:hover {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+    }
+
+    .pagination a.active {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        color: var(--background-color);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background-color: var(--card-color);
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        margin-top: 3rem;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: var(--border-color);
+        margin-bottom: 1.5rem;
+    }
+    
+    .empty-state h2 {
+        margin-bottom: 1rem;
+    }
+    
+    .empty-state p {
+        margin-bottom: 1.5rem;
+        color: var(--text-light);
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    /* Chart style overrides for dark theme */
+    #timeline-chart {
+        background-color: rgba(255, 255, 255, 0.03);
+        border-radius: var(--border-radius);
+        padding: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="history-container">
+    <div class="history-header">
+        <h1>Emotion History</h1>
+        <div class="history-controls">
+            <select class="filter-dropdown" id="time-filter">
+                <option value="day">Last 24 Hours</option>
+                <option value="week" selected>Last Week</option>
+                <option value="month">Last Month</option>
+                <option value="all">All Time</option>
+            </select>
+            <select class="filter-dropdown" id="emotion-filter">
+                <option value="all" selected>All Emotions</option>
+                <option value="happy">Happy</option>
+                <option value="sad">Sad</option>
+                <option value="angry">Angry</option>
+                <option value="surprise">Surprise</option>
+                <option value="fear">Fear</option>
+                <option value="disgust">Disgust</option>
+                <option value="neutral">Neutral</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="history-timeline">
+        <h2>Emotion Timeline</h2>
+        <div class="timeline-container">
+            <canvas id="timeline-chart"></canvas>
+        </div>
+    </div>
+
+    {% if emotion_history %}
+    <div class="history-items">
+        {% for item in emotion_history %}
+        <div class="history-item">
+            <div class="history-item-header">
+                <span class="emotion-badge emotion-{{ item.dominant_emotion }}">{{ item.dominant_emotion }}</span>
+                <span class="history-date">{{ item.timestamp|formatdate('%Y-%m-%d %H:%M') }}</span>
+            </div>
+            <div class="emotion-chart">
+                <canvas id="emotion-chart-{{ loop.index }}" class="emotion-item-chart"></canvas>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="pagination">
+        <a href="#" class="active">1</a>
+        <a href="#">2</a>
+        <a href="#">3</a>
+        <a href="#">Next »</a>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-chart-line"></i>
+        <h2>No Emotion Data Yet</h2>
+        <p>Start using the emotion recognition feature to see your emotional patterns and history tracked over time.</p>
+        <a href="{{ url_for('main_bp.emotion_recognition') }}" class="btn-primary">Start Recognition</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Timeline chart
+        const timelineCtx = document.getElementById('timeline-chart').getContext('2d');
+        
+        // Emotion data from backend
+        const emotionHistory = {{ emotion_history|tojson }};
+        
+        // Colors for emotions
+        const emotionColors = {
+            'angry': '#f44336',
+            'disgust': '#ff9800',
+            'fear': '#ffeb3b',
+            'happy': '#4CAF50',
+            'neutral': '#9e9e9e',
+            'sad': '#2196F3',
+            'surprise': '#9c27b0'
+        };
+        
+        if (emotionHistory && emotionHistory.length > 0) {
+            // Prepare data for timeline chart
+            const timestamps = emotionHistory.map(entry => {
+                const date = new Date(entry.timestamp);
+                return date.toLocaleString();
+            });
+            
+            // Create datasets for each emotion
+            const emotions = ['angry', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise'];
+            const datasets = emotions.map(emotion => {
+                return {
+                    label: emotion.charAt(0).toUpperCase() + emotion.slice(1),
+                    data: emotionHistory.map(entry => entry.emotions[emotion] * 100),
+                    borderColor: emotionColors[emotion],
+                    backgroundColor: emotionColors[emotion] + '33',
+                    fill: false,
+                    tension: 0.4,
+                    pointRadius: 3,
+                    pointHoverRadius: 5
+                };
+            });
+            
+            // Create timeline chart
+            const timelineChart = new Chart(timelineCtx, {
+                type: 'line',
+                data: {
+                    labels: timestamps,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            min: 0,
+                            max: 100,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#A0A0A0'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Confidence (%)',
+                                color: '#E4E4E4',
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#A0A0A0',
+                                maxRotation: 45,
+                                minRotation: 45
+                            },
+                            title: {
+                                display: true,
+                                text: 'Time',
+                                color: '#E4E4E4',
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                color: '#E4E4E4',
+                                font: {
+                                    size: 11
+                                },
+                                padding: 15,
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(30, 30, 30, 0.9)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            borderColor: '#333333',
+                            borderWidth: 1,
+                            padding: 10
+                        }
+                    }
+                }
+            });
+            
+            // Create individual emotion charts for each history item
+            emotionHistory.forEach((item, index) => {
+                const chartId = `emotion-chart-${index + 1}`;
+                const ctx = document.getElementById(chartId).getContext('2d');
+                
+                const labels = Object.keys(item.emotions).map(
+                    emotion => emotion.charAt(0).toUpperCase() + emotion.slice(1)
+                );
+                const data = Object.values(item.emotions).map(value => value * 100);
+                const backgroundColor = labels.map(
+                    label => emotionColors[label.toLowerCase()]
+                );
+                
+                const chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: backgroundColor,
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(30, 30, 30, 0.9)',
+                                titleColor: '#ffffff',
+                                bodyColor: '#ffffff',
+                                borderColor: '#333333',
+                                borderWidth: 1,
+                                padding: 8,
+                                displayColors: true,
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.parsed.y.toFixed(1)}%`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: {
+                                    color: '#A0A0A0',
+                                    font: { size: 9 }
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    color: '#A0A0A0',
+                                    font: { size: 9 }
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+            
+            // Animate history items on page load
+            const historyItems = document.querySelectorAll('.history-item');
+            historyItems.forEach((item, index) => {
+                item.style.opacity = '0';
+                item.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    item.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    item.style.opacity = '1';
+                    item.style.transform = 'translateY(0)';
+                }, 100 + (index * 50));
+            });
+        }
+        
+        // Filter event handlers
+        document.getElementById('time-filter').addEventListener('change', function() {
+            // Handle time filter change
+            console.log('Time filter changed to:', this.value);
+            // In a real application, you would reload the data with the new filter
+        });
+        
+        document.getElementById('emotion-filter').addEventListener('change', function() {
+            // Handle emotion filter change
+            console.log('Emotion filter changed to:', this.value);
+            // In a real application, you would reload or filter the data
+        });
+    });
+</script>
+{% endblock %}

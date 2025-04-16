@@ -1,0 +1,602 @@
+{% extends 'base.html' %}
+
+{% block title %}Emotion Recognition - EmotionLens{% endblock %}
+
+{% block head %}
+<style>
+    /* Custom styles for emotion recognition page */
+    .page-header {
+        margin-bottom: 2.5rem;
+    }
+    
+    .page-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .page-header p {
+        color: var(--text-light);
+        max-width: 600px;
+    }
+
+    .emotion-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    @media (min-width: 768px) {
+        .emotion-container {
+            flex-direction: row;
+        }
+    }
+
+    .video-container {
+        flex: 3;
+        position: relative;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        background-color: var(--surface-color);
+    }
+
+    .video-feed {
+        width: 100%;
+        height: auto;
+        display: block;
+        background-color: #111111;
+        min-height: 360px;
+    }
+
+    .performance-metrics {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        background-color: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.25rem;
+        font-size: 0.875rem;
+        backdrop-filter: blur(4px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .performance-metrics div {
+        margin: 0.25rem 0;
+    }
+
+    .emotion-results {
+        flex: 2;
+        background-color: var(--card-color);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        border: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .emotion-results h2 {
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border-color-light);
+    }
+    
+    .emotion-results h2::after {
+        display: none;
+    }
+
+    .emotion-chart-container {
+        margin: 1.5rem 0;
+        flex-grow: 1;
+        min-height: 250px;
+        background-color: rgba(255, 255, 255, 0.03);
+        border-radius: var(--border-radius);
+        padding: 1rem;
+    }
+
+    .controls {
+        display: flex;
+        margin-top: 1.5rem;
+        gap: 1rem;
+    }
+
+    .controls button {
+        flex: 1;
+        padding: 0.75rem 1rem;
+        border-radius: var(--border-radius);
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .controls button i {
+        font-size: 1.125rem;
+    }
+
+    .btn-start {
+        background-color: var(--primary-color);
+        color: var(--background-color);
+    }
+    
+    .btn-start:hover {
+        background-color: var(--primary-dark);
+    }
+
+    .btn-stop {
+        background-color: #f44336;
+        color: white;
+    }
+    
+    .btn-stop:hover {
+        background-color: #d32f2f;
+    }
+
+    .btn-snapshot {
+        background-color: var(--secondary-color);
+        color: white;
+    }
+    
+    .btn-snapshot:hover {
+        background-color: #1976d2;
+    }
+
+    .emotion-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: var(--border-radius);
+        color: white;
+        font-weight: 600;
+        text-transform: capitalize;
+    }
+
+    .dominant-emotion {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    #dominant-emotion-label {
+        font-weight: 600;
+    }
+
+    .emotion-progress {
+        height: 1.25rem;
+        margin-bottom: 1rem;
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: 1rem;
+        overflow: hidden;
+        position: relative;
+        border: 1px solid var(--border-color);
+    }
+
+    .emotion-progress-bar {
+        height: 100%;
+        color: white;
+        display: flex;
+        align-items: center;
+        padding: 0 0.75rem;
+        transition: width 0.3s ease;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        justify-content: space-between;
+    }
+    
+    .emotion-progress-bar::after {
+        content: attr(data-label);
+        margin-left: 0.25rem;
+        font-weight: 500;
+    }
+
+    .permission-request {
+        text-align: center;
+        padding: 3rem 2rem;
+        background-color: var(--card-color);
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        margin: 2rem 0;
+    }
+    
+    .permission-request h2 {
+        margin-bottom: 1rem;
+    }
+    
+    .permission-request p {
+        margin-bottom: 1.5rem;
+        color: var(--text-light);
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Real-Time Emotion Recognition</h1>
+    <p>Analyze your facial expressions in real-time and track your emotional patterns.</p>
+</div>
+
+<div class="emotion-container">
+    <div class="video-container">
+        <img id="video-feed" class="video-feed" src="{{ url_for('api.video_feed') }}" alt="Video Feed">
+        <div class="performance-metrics">
+            <div id="fps"><i class="fas fa-tachometer-alt"></i> FPS: --</div>
+            <div id="inference-time"><i class="fas fa-stopwatch"></i> Inference: --ms</div>
+        </div>
+    </div>
+    
+    <div class="emotion-results">
+        <h2>Current Emotions</h2>
+        <div class="dominant-emotion">
+            <span id="dominant-emotion-label">Detecting...</span>
+            <span id="dominant-emotion-badge" class="emotion-badge emotion-neutral">neutral</span>
+        </div>
+        
+        <div id="emotion-progress-bars">
+            <div class="emotion-progress">
+                <div id="progress-angry" class="emotion-progress-bar emotion-angry" style="width: 0%" data-label="Angry">0%</div>
+            </div>
+            <div class="emotion-progress">
+                <div id="progress-disgust" class="emotion-progress-bar emotion-disgust" style="width: 0%" data-label="Disgust">0%</div>
+            </div>
+            <div class="emotion-progress">
+                <div id="progress-fear" class="emotion-progress-bar emotion-fear" style="width: 0%" data-label="Fear">0%</div>
+            </div>
+            <div class="emotion-progress">
+                <div id="progress-happy" class="emotion-progress-bar emotion-happy" style="width: 0%" data-label="Happy">0%</div>
+            </div>
+            <div class="emotion-progress">
+                <div id="progress-neutral" class="emotion-progress-bar emotion-neutral" style="width: 0%" data-label="Neutral">0%</div>
+            </div>
+            <div class="emotion-progress">
+                <div id="progress-sad" class="emotion-progress-bar emotion-sad" style="width: 0%" data-label="Sad">0%</div>
+            </div>
+            <div class="emotion-progress">
+                <div id="progress-surprise" class="emotion-progress-bar emotion-surprise" style="width: 0%" data-label="Surprise">0%</div>
+            </div>
+        </div>
+        
+        <div class="emotion-chart-container">
+            <canvas id="emotion-chart"></canvas>
+        </div>
+        
+        <div class="controls">
+            <button id="btn-refresh" class="btn-start"><i class="fas fa-sync-alt"></i> Refresh</button>
+            <button id="btn-snapshot" class="btn-snapshot"><i class="fas fa-camera"></i> Snapshot</button>
+            <button id="btn-stop" class="btn-stop"><i class="fas fa-stop"></i> Stop</button>
+        </div>
+    </div>
+</div>
+
+<div id="permission-request" class="permission-request" style="display: none;">
+    <h2>Camera Access Required</h2>
+    <p>This feature requires access to your camera to analyze facial expressions in real-time.</p>
+    <button id="btn-request-permission" class="btn-primary">Allow Camera Access</button>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Update emotion-display.js inline to match dark theme
+document.addEventListener('DOMContentLoaded', function() {
+    // Adjust Chart.js global defaults for dark theme
+    Chart.defaults.color = '#A0A0A0';
+    Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
+    
+    // Create radar chart with dark theme styling
+    const ctx = document.getElementById('emotion-chart').getContext('2d');
+    const emotionChart = new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: ['Angry', 'Disgust', 'Fear', 'Happy', 'Neutral', 'Sad', 'Surprise'],
+            datasets: [{
+                label: 'Confidence',
+                data: [0, 0, 0, 0, 0, 0, 0],
+                backgroundColor: 'rgba(100, 216, 134, 0.2)',
+                borderColor: 'rgba(100, 216, 134, 0.8)',
+                pointBackgroundColor: [
+                    '#f44336', '#ff9800', '#ffeb3b', 
+                    '#4CAF50', '#9e9e9e', '#2196F3', '#9c27b0'
+                ],
+                pointBorderColor: '#252525',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: 'rgba(100, 216, 134, 1)'
+            }]
+        },
+        options: {
+            scales: {
+                r: {
+                    angleLines: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.05)'
+                    },
+                    pointLabels: {
+                        color: '#E4E4E4',
+                        font: {
+                            size: 12
+                        }
+                    },
+                    ticks: {
+                        backdropColor: 'transparent',
+                        color: '#A0A0A0',
+                        z: 1
+                    },
+                    suggestedMin: 0,
+                    suggestedMax: 1
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(30, 30, 30, 0.9)',
+                    titleColor: '#ffffff',
+                    bodyColor: '#ffffff',
+                    borderColor: '#333333',
+                    borderWidth: 1,
+                    padding: 10,
+                    callbacks: {
+                        label: function(context) {
+                            return `Confidence: ${(context.raw * 100).toFixed(1)}%`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    // Poll for emotion data every 500ms
+    function startEmotionPolling() {
+        setInterval(() => {
+            if (document.visibilityState === 'visible') {
+                fetchEmotionData();
+            }
+        }, 500);
+    }
+    
+    // Fetch emotion data from API
+    function fetchEmotionData() {
+        fetch('/api/analyze_current_emotion')
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error('No emotion data available');
+            })
+            .then(data => {
+                updateEmotionDisplay(data.emotions, data.dominant_emotion);
+            })
+            .catch(error => {
+                // Silent error handling - user might not have started the video feed yet
+                console.log('Waiting for emotion data...');
+            });
+    }
+    
+    // Update the display with emotion data
+    function updateEmotionDisplay(emotions, dominantEmotion) {
+        // Update dominant emotion
+        const dominantLabel = document.getElementById('dominant-emotion-label');
+        const dominantBadge = document.getElementById('dominant-emotion-badge');
+        
+        if (dominantLabel.textContent !== dominantEmotion) {
+            // Add pulse effect when emotion changes
+            dominantLabel.classList.add('pulse');
+            dominantBadge.classList.add('pulse');
+            
+            setTimeout(() => {
+                dominantLabel.classList.remove('pulse');
+                dominantBadge.classList.remove('pulse');
+            }, 700);
+        }
+        
+        dominantLabel.textContent = dominantEmotion.charAt(0).toUpperCase() + dominantEmotion.slice(1);
+        dominantBadge.textContent = dominantEmotion;
+        dominantBadge.className = `emotion-badge emotion-${dominantEmotion}`;
+        
+        // Update progress bars
+        for (const [emotion, confidence] of Object.entries(emotions)) {
+            const progressBar = document.getElementById(`progress-${emotion}`);
+            if (progressBar) {
+                const percentage = Math.round(confidence * 100);
+                progressBar.style.width = `${percentage}%`;
+                progressBar.textContent = `${percentage}%`;
+            }
+        }
+        
+        // Update chart data
+        emotionChart.data.datasets[0].data = [
+            emotions.angry || 0,
+            emotions.disgust || 0,
+            emotions.fear || 0,
+            emotions.happy || 0,
+            emotions.neutral || 0,
+            emotions.sad || 0,
+            emotions.surprise || 0
+        ];
+        emotionChart.update();
+    }
+    
+    // Start emotion polling
+    startEmotionPolling();
+});
+
+// Import video-capture.js functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Video feed elements
+    const videoFeed = document.getElementById('video-feed');
+    const permissionRequest = document.getElementById('permission-request');
+    const btnRefresh = document.getElementById('btn-refresh');
+    const btnStop = document.getElementById('btn-stop');
+    const btnSnapshot = document.getElementById('btn-snapshot');
+    const btnRequestPermission = document.getElementById('btn-request-permission');
+
+    // Performance monitoring elements
+    const fpsElement = document.getElementById('fps');
+    const inferenceTimeElement = document.getElementById('inference-time');
+
+    // Stream status
+    let streamActive = true;
+    let performanceInterval;
+
+    // Initialize video feed
+    function initVideoFeed() {
+        videoFeed.src = "/api/video_feed?" + new Date().getTime();
+        streamActive = true;
+        startPerformanceMonitoring();
+    }
+
+    // Refresh video feed
+    function refreshVideoFeed() {
+        videoFeed.src = "/api/video_feed?" + new Date().getTime();
+        streamActive = true;
+        startPerformanceMonitoring();
+    }
+
+    // Stop video feed
+    function stopVideoFeed() {
+        videoFeed.src = "";
+        streamActive = false;
+        stopPerformanceMonitoring();
+    }
+
+    // Take snapshot
+    function takeSnapshot() {
+        fetch('/api/analyze_current_emotion')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('No emotion data available');
+                }
+                return response.json();
+            })
+            .then(data => {
+                showNotification('Snapshot saved!');
+            })
+            .catch(error => {
+                showNotification('Unable to save snapshot: ' + error.message, 'error');
+            });
+    }
+
+    // Show notification
+    function showNotification(message, type = 'success') {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 10);
+        
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                document.body.removeChild(notification);
+            }, 300);
+        }, 3000);
+    }
+
+    // Start performance monitoring
+    function startPerformanceMonitoring() {
+        if (performanceInterval) {
+            clearInterval(performanceInterval);
+        }
+        
+        performanceInterval = setInterval(() => {
+            fetch('/api/performance_metrics')
+                .then(response => response.json())
+                .then(data => {
+                    fpsElement.innerHTML = `<i class="fas fa-tachometer-alt"></i> FPS: ${data.fps}`;
+                    inferenceTimeElement.innerHTML = `<i class="fas fa-stopwatch"></i> Inference: ${(data.avg_inference_time * 1000).toFixed(1)}ms`;
+                })
+                .catch(error => {
+                    console.error('Error fetching performance metrics:', error);
+                });
+        }, 2000);
+    }
+
+    // Stop performance monitoring
+    function stopPerformanceMonitoring() {
+        clearInterval(performanceInterval);
+        fpsElement.innerHTML = '<i class="fas fa-tachometer-alt"></i> FPS: --';
+        inferenceTimeElement.innerHTML = '<i class="fas fa-stopwatch"></i> Inference: --ms';
+    }
+
+    // Request camera permission
+    function requestCameraPermission() {
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                permissionRequest.style.display = 'none';
+                videoFeed.style.display = 'block';
+                stream.getTracks().forEach(track => track.stop());
+                initVideoFeed();
+            })
+            .catch(error => {
+                showNotification('Camera permission denied. Please enable camera access.', 'error');
+                console.error('Error accessing camera:', error);
+            });
+    }
+
+    // Event listeners
+    btnRefresh.addEventListener('click', refreshVideoFeed);
+    btnStop.addEventListener('click', stopVideoFeed);
+    btnSnapshot.addEventListener('click', takeSnapshot);
+    btnRequestPermission.addEventListener('click', requestCameraPermission);
+
+    // Check camera permission
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.permissions.query({ name: 'camera' })
+            .then(permissionStatus => {
+                if (permissionStatus.state === 'granted') {
+                    initVideoFeed();
+                } else if (permissionStatus.state === 'prompt') {
+                    permissionRequest.style.display = 'block';
+                    videoFeed.style.display = 'none';
+                } else {
+                    permissionRequest.style.display = 'block';
+                    videoFeed.style.display = 'none';
+                    showNotification('Camera access is required for emotion recognition.', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error checking camera permission:', error);
+                initVideoFeed();
+            });
+    } else {
+        showNotification('Your browser does not support camera access.', 'error');
+    }
+
+    // Initialize video feed if the page loads with an existing feed URL
+    if (videoFeed.src && videoFeed.src.includes('/api/video_feed')) {
+        startPerformanceMonitoring();
+    }
+    
+    // Add animation for elements
+    const elements = [
+        document.querySelector('.video-container'),
+        document.querySelector('.emotion-results')
+    ];
+    
+    elements.forEach((element, index) => {
+        element.style.opacity = '0';
+        element.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            element.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            element.style.opacity = '1';
+            element.style.transform = 'translateY(0)';
+        }, 100 * index);
+    });
+});
+</script>
+{% endblock %}

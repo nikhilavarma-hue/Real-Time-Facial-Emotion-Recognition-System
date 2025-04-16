@@ -1,0 +1,656 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - EmotionLens{% endblock %}
+
+{% block head %}
+<style>
+    .dashboard-container {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    @media (min-width: 768px) {
+        .dashboard-container {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    @media (min-width: 1200px) {
+        .dashboard-container {
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+    }
+
+    .dashboard-card {
+        background-color: var(--card-color);
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        transition: all 0.25s ease;
+    }
+    
+    .dashboard-card:hover {
+        border-color: var(--primary-color);
+        transform: translateY(-3px);
+    }
+
+    .dashboard-header {
+        margin-bottom: 2.5rem;
+    }
+    
+    .dashboard-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .dashboard-header p {
+        color: var(--text-light);
+        font-size: 1.1rem;
+    }
+
+    .emotion-summary {
+        grid-column: span 2;
+    }
+
+    .stats-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border-color-light);
+        padding-bottom: 1rem;
+    }
+    
+    .stats-header h2 {
+        margin-bottom: 0;
+    }
+    
+    .stats-header h2::after {
+        display: none;
+    }
+    
+    .stats-header span {
+        background-color: rgba(100, 216, 134, 0.1);
+        color: var(--primary-color);
+        padding: 0.5rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        border: 1px solid var(--primary-color);
+    }
+
+    .emotion-stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .emotion-stat-card {
+        flex: 1;
+        min-width: 100px;
+        padding: 1.25rem 1rem;
+        border-radius: var(--border-radius);
+        color: white;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        transition: transform 0.2s ease;
+    }
+    
+    .emotion-stat-card:hover {
+        transform: scale(1.05);
+    }
+
+    .stat-number {
+        font-size: 1.75rem;
+        font-weight: bold;
+        margin-bottom: 0.25rem;
+    }
+    
+    .stat-label {
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .chart-container {
+        height: 250px;
+        margin-top: 2rem;
+    }
+
+    .emotion-timeline {
+        grid-column: span 3;
+    }
+
+    .insights-container {
+        margin-top: 1.5rem;
+    }
+
+    .insights-card, .suggestions-card {
+        margin-bottom: 20px;
+    }
+
+    .insight-item, .suggestion-item {
+        padding: 1rem 1.25rem;
+        border-left: 3px solid var(--primary-color);
+        background-color: rgba(100, 216, 134, 0.05);
+        margin-bottom: 1rem;
+        border-radius: 0 var(--border-radius) var(--border-radius) 0;
+        transition: transform 0.2s ease;
+    }
+    
+    .insight-item:hover, .suggestion-item:hover {
+        transform: translateX(5px);
+    }
+
+    .suggestion-item {
+        border-left-color: var(--secondary-color);
+        background-color: rgba(97, 218, 251, 0.05);
+    }
+
+    .quick-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .action-btn {
+        flex: 1;
+        min-width: 150px;
+        padding: 1rem 1.25rem;
+        border-radius: var(--border-radius);
+        text-align: center;
+        color: white;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-3px);
+        filter: brightness(110%);
+    }
+    
+    .action-btn i {
+        font-size: 1.125rem;
+    }
+
+    .action-recognition {
+        background-color: var(--primary-color);
+    }
+
+    .action-history {
+        background-color: var(--secondary-color);
+    }
+
+    .action-reports {
+        background-color: #9c27b0;
+    }
+
+    .action-settings {
+        background-color: #607d8b;
+    }
+    
+    /* Chart style overrides for dark theme */
+    #emotions-pie-chart, #emotion-timeline-chart {
+        background-color: rgba(255, 255, 255, 0.03);
+        border-radius: var(--border-radius);
+        padding: 0.5rem;
+    }
+    
+    /* Emotion color classes */
+    .emotion-angry {
+        background-color: var(--emotion-angry);
+    }
+    
+    .emotion-disgust {
+        background-color: var(--emotion-disgust);
+    }
+    
+    .emotion-fear {
+        background-color: var(--emotion-fear);
+        color: #333; /* Dark text for light background */
+    }
+    
+    .emotion-happy {
+        background-color: var(--emotion-happy);
+    }
+    
+    .emotion-neutral {
+        background-color: var(--emotion-neutral);
+    }
+    
+    .emotion-sad {
+        background-color: var(--emotion-sad);
+    }
+    
+    .emotion-surprise {
+        background-color: var(--emotion-surprise);
+    }
+    
+    .highlight {
+        color: var(--primary-color);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1>Your Emotion Dashboard</h1>
+    <p>Overview of your emotional patterns and insights</p>
+</div>
+
+<div class="dashboard-container">
+    <!-- Emotion Summary Card -->
+    <div class="dashboard-card emotion-summary">
+        <div class="stats-header">
+            <h2>Emotion Summary</h2>
+            <span>{{ total_records|default(0) }} emotions recorded</span>
+        </div>
+        
+        <p>Your most common emotion is <strong class="highlight">{{ most_common_emotion|default('Neutral') }}</strong></p>
+        
+        <div class="emotion-stats">
+            {% if emotion_stats %}
+                {% for emotion, count in emotion_stats.items() %}
+                <div class="emotion-stat-card emotion-{{ emotion }}">
+                    <div class="stat-number">{{ count }}</div>
+                    <div class="stat-label">{{ emotion|title }}</div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <!-- Placeholder data when no emotions are recorded yet -->
+                <div class="emotion-stat-card emotion-neutral">
+                    <div class="stat-number">0</div>
+                    <div class="stat-label">No Data</div>
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="chart-container">
+            <canvas id="emotions-pie-chart"></canvas>
+        </div>
+    </div>
+    
+    <!-- Insights Card -->
+    <div class="dashboard-card">
+        <div class="stats-header">
+            <h2>Insights</h2>
+        </div>
+        <div class="insights-container">
+            {% if insights %}
+                {% for insight in insights %}
+                <div class="insight-item">
+                    {{ insight }}
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>Continue using the app to get personalized insights.</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Suggestions Card -->
+    <div class="dashboard-card">
+        <div class="stats-header">
+            <h2>Suggestions</h2>
+        </div>
+        <div class="suggestions-container">
+            {% if suggestions %}
+                {% for suggestion in suggestions %}
+                <div class="suggestion-item">
+                    {{ suggestion }}
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>Continue using the app to get personalized suggestions.</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Emotion Timeline Card -->
+    <div class="dashboard-card emotion-timeline">
+        <div class="stats-header">
+            <h2>Emotion Timeline</h2>
+        </div>
+        <div class="chart-container">
+            <canvas id="emotion-timeline-chart"></canvas>
+        </div>
+    </div>
+    
+    <!-- Quick Actions Card -->
+    <div class="dashboard-card">
+        <div class="stats-header">
+            <h2>Quick Actions</h2>
+        </div>
+        <div class="quick-actions">
+            <a href="{{ url_for('main_bp.emotion_recognition') }}" class="action-btn action-recognition">
+                <i class="fas fa-camera"></i> Start Recognition
+            </a>
+            <a href="{{ url_for('dashboard_bp.history') }}" class="action-btn action-history">
+                <i class="fas fa-history"></i> View History
+            </a>
+            <a href="{{ url_for('dashboard_bp.reports') }}" class="action-btn action-reports">
+                <i class="fas fa-file-alt"></i> Generate Report
+            </a>
+            <a href="{{ url_for('settings_bp.settings') }}" class="action-btn action-settings">
+                <i class="fas fa-cog"></i> Settings
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Define emotion colors using the same values as CSS variables
+    const emotionColors = {
+        'angry': '#f44336',    // --emotion-angry
+        'disgust': '#ff9800',  // --emotion-disgust
+        'fear': '#ffeb3b',     // --emotion-fear
+        'happy': '#4CAF50',    // --emotion-happy
+        'neutral': '#9e9e9e',  // --emotion-neutral
+        'sad': '#2196F3',      // --emotion-sad
+        'surprise': '#9c27b0'  // --emotion-surprise
+    };
+    
+    // Safe parsing of JSON data from template
+    let emotionStats = {};
+    let emotionHistory = [];
+    
+    try {
+        emotionStats = JSON.parse('{{ emotion_stats|tojson|safe }}' || '{}');
+    } catch (e) {
+        console.error("Error parsing emotion stats:", e);
+        emotionStats = { 'neutral': 0 }; // Fallback
+    }
+    
+    try {
+        emotionHistory = JSON.parse('{{ emotion_history|tojson|safe }}' || '[]');
+    } catch (e) {
+        console.error("Error parsing emotion history:", e);
+        emotionHistory = []; // Fallback
+    }
+    
+    // Prepare data for pie chart
+    const emotionLabels = Object.keys(emotionStats).map(emotion => 
+        emotion.charAt(0).toUpperCase() + emotion.slice(1)
+    );
+    const emotionCounts = Object.values(emotionStats);
+    const chartColors = Object.keys(emotionStats).map(emotion => emotionColors[emotion] || '#9e9e9e');
+    
+    // Create text color for charts based on theme
+    const textColor = '#E4E4E4'; // Default for dark theme
+    const gridColor = 'rgba(255, 255, 255, 0.05)';
+    
+    // Create pie chart
+    const pieCtx = document.getElementById('emotions-pie-chart').getContext('2d');
+    
+    // Check if we have data for the chart
+    if (emotionCounts.length === 0 || emotionCounts.every(count => count === 0)) {
+        // No data - render empty chart with message
+        new Chart(pieCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['No Data'],
+                datasets: [{
+                    data: [1],
+                    backgroundColor: ['#9e9e9e'],
+                    borderWidth: 1,
+                    borderColor: '#252525'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        enabled: false
+                    }
+                },
+                cutout: '60%'
+            }
+        });
+        
+        // Add "No data" text to the center
+        const noDataText = document.createElement('div');
+        noDataText.style.position = 'absolute';
+        noDataText.style.top = '50%';
+        noDataText.style.left = '50%';
+        noDataText.style.transform = 'translate(-50%, -50%)';
+        noDataText.style.color = textColor;
+        noDataText.style.fontSize = '16px';
+        noDataText.textContent = 'No emotion data yet';
+        
+        const chartContainer = pieCtx.canvas.parentNode;
+        chartContainer.style.position = 'relative';
+        chartContainer.appendChild(noDataText);
+    } else {
+        // We have data - render actual chart
+        new Chart(pieCtx, {
+            type: 'doughnut',
+            data: {
+                labels: emotionLabels,
+                datasets: [{
+                    data: emotionCounts,
+                    backgroundColor: chartColors,
+                    borderWidth: 1,
+                    borderColor: '#252525'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            color: textColor,
+                            font: {
+                                size: 12
+                            },
+                            padding: 15
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(30, 30, 30, 0.9)',
+                        titleColor: '#ffffff',
+                        bodyColor: '#ffffff',
+                        padding: 10,
+                        displayColors: true,
+                        usePointStyle: true
+                    }
+                },
+                cutout: '60%'
+            }
+        });
+    }
+    
+    // Create timeline chart if we have history data
+    const timelineCtx = document.getElementById('emotion-timeline-chart').getContext('2d');
+    
+    if (emotionHistory && emotionHistory.length > 0) {
+        // Extract timestamps and format them
+        const timestamps = emotionHistory.map(entry => {
+            try {
+                const date = new Date(entry.timestamp);
+                return date.toLocaleString();
+            } catch {
+                return 'Unknown';
+            }
+        }).reverse();
+        
+        // Create datasets for each emotion
+        const emotionNames = ['angry', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise'];
+        const datasets = emotionNames.map(emotion => {
+            return {
+                label: emotion.charAt(0).toUpperCase() + emotion.slice(1),
+                data: emotionHistory.map(entry => {
+                    // Safely extract emotion value with fallback
+                    const val = entry.emotions && entry.emotions[emotion] !== undefined ? 
+                        entry.emotions[emotion] * 100 : 0; // Convert to percentage
+                    return val;
+                }).reverse(),
+                borderColor: emotionColors[emotion],
+                backgroundColor: emotionColors[emotion] + '33', // Add transparency
+                fill: false,
+                tension: 0.4,
+                pointRadius: 3,
+                pointHoverRadius: 5
+            };
+        });
+        
+        // Create timeline chart
+        new Chart(timelineCtx, {
+            type: 'line',
+            data: {
+                labels: timestamps,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        min: 0,
+                        max: 100,
+                        grid: {
+                            color: gridColor
+                        },
+                        ticks: {
+                            color: '#A0A0A0'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Confidence (%)',
+                            color: textColor,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: gridColor
+                        },
+                        ticks: {
+                            color: '#A0A0A0',
+                            maxRotation: 45,
+                            minRotation: 45
+                        },
+                        title: {
+                            display: true,
+                            text: 'Time',
+                            color: textColor,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    }
+                },
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            color: textColor,
+                            font: {
+                                size: 11
+                            },
+                            padding: 15,
+                            usePointStyle: true
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(30, 30, 30, 0.9)',
+                        titleColor: '#ffffff',
+                        bodyColor: '#ffffff',
+                        padding: 10
+                    }
+                }
+            }
+        });
+    } else {
+        // No timeline data - show empty chart with message
+        new Chart(timelineCtx, {
+            type: 'line',
+            data: {
+                labels: ['No Data Available'],
+                datasets: [{
+                    label: 'No emotions recorded yet',
+                    data: [0],
+                    borderColor: '#9e9e9e',
+                    backgroundColor: '#9e9e9e33',
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        min: 0,
+                        max: 100,
+                        grid: {
+                            color: gridColor
+                        },
+                        ticks: {
+                            color: '#A0A0A0'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: gridColor
+                        },
+                        ticks: {
+                            color: '#A0A0A0'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            color: textColor,
+                            font: {
+                                size: 11
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // Add animation for dashboard cards
+    const cards = document.querySelectorAll('.dashboard-card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, 100 * index);
+    });
+});
+</script>
+{% endblock %}

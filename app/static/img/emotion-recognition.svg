@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <!-- Background -->
+  <rect x="50" y="30" width="300" height="240" rx="20" fill="#f0f9ff" />
+  
+  <!-- Face Outline -->
+  <circle cx="200" cy="150" r="80" fill="#ffffff" stroke="#4CAF50" stroke-width="3" />
+  
+  <!-- Face Features -->
+  <!-- Eyes -->
+  <circle cx="170" cy="130" r="10" fill="#333333" />
+  <circle cx="230" cy="130" r="10" fill="#333333" />
+  
+  <!-- Smile -->
+  <path d="M160,170 Q200,210 240,170" fill="none" stroke="#333333" stroke-width="4" stroke-linecap="round" />
+  
+  <!-- Scan Lines -->
+  <line x1="100" y1="80" x2="300" y2="80" stroke="#4CAF50" stroke-width="2" stroke-dasharray="5,5" />
+  <line x1="100" y1="150" x2="300" y2="150" stroke="#4CAF50" stroke-width="2" stroke-dasharray="5,5" />
+  <line x1="100" y1="220" x2="300" y2="220" stroke="#4CAF50" stroke-width="2" stroke-dasharray="5,5" />
+  
+  <!-- Emotion Labels -->
+  <rect x="260" y="90" width="70" height="25" rx="5" fill="#4CAF50" />
+  <text x="295" y="108" font-family="Arial" font-size="12" text-anchor="middle" fill="white">Happy</text>
+  
+  <rect x="260" y="125" width="70" height="25" rx="5" fill="#2196F3" opacity="0.7" />
+  <text x="295" y="143" font-family="Arial" font-size="12" text-anchor="middle" fill="white">Sad</text>
+  
+  <rect x="260" y="160" width="70" height="25" rx="5" fill="#FF9800" opacity="0.5" />
+  <text x="295" y="178" font-family="Arial" font-size="12" text-anchor="middle" fill="white">Angry</text>
+  
+  <!-- Detection Points -->
+  <circle cx="170" cy="130" r="2" fill="#FF0000" />
+  <circle cx="230" cy="130" r="2" fill="#FF0000" />
+  <circle cx="200" cy="160" r="2" fill="#FF0000" />
+  <circle cx="170" cy="170" r="2" fill="#FF0000" />
+  <circle cx="230" cy="170" r="2" fill="#FF0000" />
+</svg>

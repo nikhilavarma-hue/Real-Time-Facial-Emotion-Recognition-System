@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}EmotionLens - Facial Emotion Recognition{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-content">
+        <h1>Understand Your Emotions</h1>
+        <p>Real-time facial emotion recognition powered by machine learning technology that helps you track and analyze your emotional patterns.</p>
+        {% if g is defined and g.user %}
+        <a href="{{ url_for('main_bp.emotion_recognition') }}" class="btn-primary">Start Recognition</a>
+        {% else %}
+        <a href="{{ url_for('main_bp.register') }}" class="btn-primary">Get Started</a>
+        <a href="{{ url_for('main_bp.login') }}" class="btn-secondary">Login</a>
+        {% endif %}
+    </div>
+    <div class="hero-image">
+        <img src="{{ url_for('static', filename='img/emotion-recognition.svg') }}" alt="Facial Emotion Recognition">
+    </div>
+</section>
+
+<section class="features">
+    <h2>Key Features</h2>
+    <div class="feature-grid">
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-camera"></i>
+            </div>
+            <h3>Real-Time Recognition</h3>
+            <p>Analyze emotions in real-time with high accuracy and low latency.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <h3>Emotion Analytics</h3>
+            <p>Track and visualize your emotional patterns over time.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-lightbulb"></i>
+            </div>
+            <h3>AI-Powered Insights</h3>
+            <p>Get personalized insights and suggestions based on your emotional data.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-lock"></i>
+            </div>
+            <h3>Privacy-Focused</h3>
+            <p>All processing happens locally with your data privacy as a priority.</p>
+        </div>
+    </div>
+</section>
+
+<section class="how-it-works">
+    <h2>How It Works</h2>
+    <div class="steps" id="process-steps">
+        <div class="step">
+            <div class="step-number">1</div>
+            <h3>Capture</h3>
+            <p>Your webcam captures video frames in real-time.</p>
+        </div>
+        <div class="step">
+            <div class="step-number">2</div>
+            <h3>Analyze</h3>
+            <p>Our AI model detects and analyzes facial expressions.</p>
+        </div>
+        <div class="step">
+            <div class="step-number">3</div>
+            <h3>Visualize</h3>
+            <p>See your emotions displayed with detailed analytics.</p>
+        </div>
+        <div class="step">
+            <div class="step-number">4</div>
+            <h3>Understand</h3>
+            <p>Gain insights into your emotional patterns over time.</p>
+        </div>
+    </div>
+</section>
+
+<section class="cta">
+    <div class="cta-content">
+        <h2>Ready to understand your emotions better?</h2>
+        <p>Start your emotion recognition journey today.</p>
+        {% if g is defined and g.user %}
+        <a href="{{ url_for('main_bp.emotion_recognition') }}" class="btn-primary">Start Recognition</a>
+        {% else %}
+        <a href="{{ url_for('main_bp.register') }}" class="btn-primary">Sign Up Now</a>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Add animation for steps section
+    document.addEventListener('DOMContentLoaded', function() {
+        const stepsEl = document.getElementById('process-steps');
+        
+        // Check if element is in viewport
+        function isInViewport(el) {
+            const rect = el.getBoundingClientRect();
+            return (
+                rect.top >= 0 &&
+                rect.left >= 0 &&
+                rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+                rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+            );
+        }
+        
+        // Add visible class when scrolled into view
+        function handleScroll() {
+            if (isInViewport(stepsEl)) {
+                stepsEl.classList.add('visible');
+                window.removeEventListener('scroll', handleScroll);
+            }
+        }
+        
+        // Initial check
+        handleScroll();
+        
+        // Add scroll listener
+        window.addEventListener('scroll', handleScroll);
+    });
+</script>
+{% endblock %}

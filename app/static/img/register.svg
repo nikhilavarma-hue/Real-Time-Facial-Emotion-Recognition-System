@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <!-- Background -->
+  <rect x="0" y="0" width="400" height="300" rx="0" fill="#f5f5f5" opacity="0.3" />
+  
+  <!-- Register Form Shape -->
+  <rect x="80" y="30" width="240" height="240" rx="15" fill="#ffffff" stroke="#4CAF50" stroke-width="2" />
+  
+  <!-- Username Field -->
+  <rect x="100" y="80" width="200" height="30" rx="5" fill="#f9f9f9" stroke="#dddddd" stroke-width="1" />
+  <circle cx="115" cy="95" r="7" fill="#4CAF50" opacity="0.8" />
+  <line x1="135" y1="95" x2="285" y2="95" stroke="#bbbbbb" stroke-width="2" />
+  
+  <!-- Email Field -->
+  <rect x="100" y="120" width="200" height="30" rx="5" fill="#f9f9f9" stroke="#dddddd" stroke-width="1" />
+  <circle cx="115" cy="135" r="7" fill="#4CAF50" opacity="0.8" />
+  <line x1="135" y1="135" x2="285" y2="135" stroke="#bbbbbb" stroke-width="2" />
+  
+  <!-- Password Field -->
+  <rect x="100" y="160" width="200" height="30" rx="5" fill="#f9f9f9" stroke="#dddddd" stroke-width="1" />
+  <circle cx="115" cy="175" r="7" fill="#4CAF50" opacity="0.8" />
+  <line x1="135" y1="175" x2="285" y2="175" stroke="#bbbbbb" stroke-width="2" />
+  
+  <!-- Confirm Password Field -->
+  <rect x="100" y="200" width="200" height="30" rx="5" fill="#f9f9f9" stroke="#dddddd" stroke-width="1" />
+  <circle cx="115" cy="215" r="7" fill="#4CAF50" opacity="0.8" />
+  <line x1="135" y1="215" x2="285" y2="215" stroke="#bbbbbb" stroke-width="2" />
+  
+  <!-- Register Button -->
+  <rect x="100" y="240" width="200" height="35" rx="5" fill="#4CAF50" />
+  <text x="200" y="263" font-family="Arial" font-size="16" font-weight="bold" text-anchor="middle" fill="white">Create Account</text>
+  
+  <!-- Form Title -->
+  <text x="200" y="55" font-family="Arial" font-size="18" font-weight="bold" text-anchor="middle" fill="#333333">Register New Account</text>
+  
+  <!-- Decorative Elements -->
+  <circle cx="350" cy="50" r="25" fill="#4CAF50" opacity="0.1" />
+  <circle cx="50" cy="150" r="30" fill="#4CAF50" opacity="0.1" />
+  <circle cx="320" cy="270" r="20" fill="#4CAF50" opacity="0.1" />
+  <path d="M30,30 L60,60" stroke="#4CAF50" stroke-width="2" opacity="0.2" />
+  <path d="M340,200 L370,230" stroke="#4CAF50" stroke-width="2" opacity="0.2" />
+</svg>
